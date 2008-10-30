@@ -5,7 +5,7 @@ module DataMapper
       primitive String
       size 128
       
-      def self.dump(value, property)
+      def self.dump(value, property = nil)
         return nil if value.nil?
         if value == 'false'
           '0'
