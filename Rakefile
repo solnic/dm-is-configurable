@@ -12,13 +12,13 @@ GEM_NAME = "dm-is-configurable"
 GEM_VERSION = DataMapper::Is::Configurable::VERSION
 GEM_DEPENDENCIES = [["dm-core", GEM_VERSION]]
 GEM_CLEAN = ["log", "pkg"]
-GEM_EXTRAS = { :has_rdoc => true, :extra_rdoc_files => %w[ README.txt LICENSE TODO ] }
+GEM_EXTRAS = { :has_rdoc => true, :extra_rdoc_files => %w[ README.markdown LICENSE TODO ] }
 
 PROJECT_NAME = "dm-is-configurable"
 PROJECT_URL  = "http://github.com/solnic/dm-is-configurable/tree/master"
 PROJECT_DESCRIPTION = PROJECT_SUMMARY = "DataMapper plugin which allows to add configuration to your models"
 
-#require ROOT.parent + 'tasks/hoe'
+require 'tasks/hoe'
 
 task :default => [ :spec ]
 

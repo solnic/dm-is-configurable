@@ -1,7 +1,7 @@
 History.txt
 LICENSE
 Manifest.txt
-README.txt
+README.markdown
 Rakefile
 TODO
 lib/dm-is-configurable.rb
@@ -11,7 +11,6 @@ lib/dm-is-configurable/types/option.rb
 lib/dm-is-configurable/configuration.rb
 lib/dm-is-configurable/configuration_option.rb
 spec/integration/configurable_spec.rb
-spec/unit/option_type_spec.rb
 spec/unit/configuration_option_spec.rb
 spec/unit/configuration_spec.rb
 spec/spec.opts
