@@ -39,14 +39,18 @@ module DataMapper
       module ClassMethods
         attr_accessor :configuration_options
         
-        def setup_configuration
+        def setup_configuration(options={})
+          self.configuration_options.merge!(options) if options
           self.configuration_options.each do |name, properties|
-            Configuration.create(
-              :name => name, 
-              :type => properties[:type] == :string ? nil : properties[:type], 
-              :default => properties[:default],
-              :model_class => self
-            )
+            conf_properties = { :name => name, 
+                :type => properties[:type] == :string ? nil : properties[:type], 
+                :default => properties[:default],
+                :model_class => self }
+            if configuration = Configuration.first(:name => name, :model_class => self)
+              configuration.update_attributes(conf_properties)
+            else
+              Configuration.create(conf_properties)
+            end
           end
         end
         
@@ -112,9 +116,13 @@ module DataMapper
         private
         
         def fetch_configuration_option(name)
-          # TODO: this should be fetched using one query!
           configuration = Configuration.first(:name => name, :model_class => self.class.to_s)
-          [configuration, configuration.options.first(:configurable_id => id)]
+          unless new_record?
+            option = configuration.options.first(:configurable_id => id)
+          else
+            option = self.options.detect { |o| o if o.configuration_id == configuration.id }
+          end
+          [configuration, option]
         end
         
       end # InstanceMethods
