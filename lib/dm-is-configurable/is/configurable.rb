@@ -40,6 +40,10 @@ module DataMapper
         attr_accessor :configuration_options
         
         def setup_configuration(options={})
+          unless Configuration.storage_exists? || ConfigurationOption.storage_exists?
+            [Configuration, ConfigurationOption].each { |m| m.auto_migrate! }
+          end
+          
           self.configuration_options.merge!(options) if options
           self.configuration_options.each do |name, properties|
             conf_properties = { :name => name, 

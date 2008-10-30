@@ -10,7 +10,7 @@ AUTHOR = "Piotr Solnica"
 EMAIL  = "piotr [a] zenbe [d] com"
 GEM_NAME = "dm-is-configurable"
 GEM_VERSION = DataMapper::Is::Configurable::VERSION
-GEM_DEPENDENCIES = [["dm-core", GEM_VERSION]]
+GEM_DEPENDENCIES = [["dm-core", '>=0.9.6']]
 GEM_CLEAN = ["log", "pkg"]
 GEM_EXTRAS = { :has_rdoc => true, :extra_rdoc_files => %w[ README.markdown LICENSE TODO ] }
 
