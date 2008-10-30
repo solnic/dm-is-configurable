@@ -2,7 +2,7 @@ module DataMapper
   module Is
     module Configurable
       
-      VALID_TYPES = [:boolean, :string, :integer, :float]
+      VALID_TYPES = [:boolean, :string, :fixnum, :float]
   
       class InvalidConfigurationOptions < StandardError
         def initialize(who, errors)
@@ -121,7 +121,7 @@ module DataMapper
           case configuration.type
           when 'boolean'
             option_value == '1'
-          when 'integer'
+          when 'fixnum'
             option_value.to_i
           when 'float'
             option_value.to_f

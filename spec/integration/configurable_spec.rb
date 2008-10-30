@@ -48,7 +48,7 @@ if HAS_SQLITE3 || HAS_MYSQL || HAS_POSTGRES
     
     it 'should provide a way to add dynamically a new set of options' do
       Item.setup_configuration({
-        :four => { :type => :integer, :default => 100 }
+        :four => { :type => :fixnum, :default => 100 }
       })
       item = Item.new
       item.configuration[:four].should eql(100)
