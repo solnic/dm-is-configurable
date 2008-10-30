@@ -49,6 +49,14 @@ if HAS_SQLITE3 || HAS_MYSQL || HAS_POSTGRES
         @item.configuration[:three].should be(false)
       end
       
+      it 'should restore a default value' do
+        count = ConfigurationOption.all.size
+        @item.configuration[:one] = 'anything'
+        @item.configuration[:one] = 'something'
+        @item.configuration[:one].should eql('something')
+        ConfigurationOption.all.size.should eql(count)
+      end
+      
     end
     
     describe 'Setting custom values' do

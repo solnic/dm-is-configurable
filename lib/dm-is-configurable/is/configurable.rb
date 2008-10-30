@@ -76,16 +76,19 @@ module DataMapper
         
         def options_set(name, value)
           configuration, option = fetch_configuration_option(name)
-          if (value = DataMapper::Types::Option.dump(value.to_s)) != configuration.default
-            if option.nil?
-              params = {:configuration_id => configuration.id, :value => value}
-              if new_record?
-                option = self.options.build(params)
-              else
-                option = ConfigurationOption.create(params.merge!(:configurable_id => id))
-              end
+          do_update = DataMapper::Types::Option.dump(value.to_s) != configuration.default
+          if do_update && option.nil?
+            params = {:configuration_id => configuration.id, :value => value}
+            if new_record?
+              option = self.options.build(params)
             else
+              option = ConfigurationOption.create(params.merge!(:configurable_id => id))
+            end
+          elsif !option.nil?
+            if do_update
               option.update_attributes(:value => value)
+            else
+              option.destroy
             end
           end
           option
