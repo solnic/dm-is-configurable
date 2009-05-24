@@ -4,7 +4,7 @@
 
 THIS IS A WORK-IN-PROGRESS!
 
-The plugin allows you to add configuration to your models. 
+The plugin allows you to add configuration to your models.
 
 ## Example usage:
 
@@ -16,9 +16,9 @@ The plugin allows you to add configuration to your models.
       property :id, Serial
       property :name, String
 
-      is :configurable, :with => { 
-        :cheezburger_limit => { :type => :integer, :default => 10 }, 
-        :be_cute =>           { :type => :boolean, :default => true }
+      is :configurable, :with => {
+        :cheezburger_limit => 10,
+        :be_cute => true
       }
     end
 

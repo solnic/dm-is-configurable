@@ -17,8 +17,8 @@ The plugin allows you to add configuration to your models.
       property :name, String
 
       is :configurable, :with => { 
-        :cheezburger_limit => { :default => 10 }, 
-        :be_cute =>           { :default => true }
+        :cheezburger_limit => 10, 
+        :be_cute => true
       }
     end
 
