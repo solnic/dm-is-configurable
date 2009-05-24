@@ -28,7 +28,7 @@ module DataMapper
         extend  DataMapper::Is::Configurable::ClassMethods
         include DataMapper::Is::Configurable::InstanceMethods
         
-        has n, :options, :class_name => 'ConfigurationOption', :child_key => [:configurable_id]
+        has n, :options, :model => ConfigurationOption, :child_key => [:configurable_id]
         
         unless options[:with].nil?
           self.configuration_options = options[:with]
@@ -53,7 +53,7 @@ module DataMapper
                 :default => properties[:default],
                 :model_class => self }
             if configuration = Configuration.first(:name => name, :model_class => self)
-              configuration.update_attributes(conf_properties)
+              configuration.update(conf_properties)
             else
               Configuration.create(conf_properties)
             end
@@ -100,14 +100,14 @@ module DataMapper
           do_update = DataMapper::Types::Option.dump(value.to_s) != configuration.default
           if do_update && option.nil?
             params = {:configuration_id => configuration.id, :value => value}
-            if new_record?
-              option = self.options.build(params)
+            if new?
+              option = self.options.new(params)
             else
               option = ConfigurationOption.create(params.merge!(:configurable_id => id))
             end
           elsif !option.nil?
             if do_update
-              option.update_attributes(:value => value)
+              option.update(:value => value)
             else
               option.destroy
             end
@@ -134,7 +134,7 @@ module DataMapper
         
         def fetch_configuration_option(name)
           configuration = Configuration.first(:name => name, :model_class => self.class.to_s)
-          unless new_record?
+          unless new?
             option = configuration.options.first(:configurable_id => id)
           else
             option = self.options.detect { |o| o if o.configuration_id == configuration.id }
