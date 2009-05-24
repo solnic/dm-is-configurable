@@ -24,9 +24,20 @@ if HAS_SQLITE3 || HAS_MYSQL || HAS_POSTGRES
         include DataMapper::Resource
         property :id, Serial
         is :configurable, :with => {
-          :one => { :default => nil }, 
-          :two => { :default => false },
-          :two => { :default => false }
+          :one   => { :default => nil },
+          :two   => { :default => false },
+          :three => { :default => false }
+        }
+        auto_migrate!
+        setup_configuration
+      end
+
+      class ItemThree
+        include DataMapper::Resource
+        property :id, Serial
+        is :configurable, :with => {
+          :one => '1',
+          :two => { :default => '1', :type => :string }
         }
         auto_migrate!
         setup_configuration
@@ -34,6 +45,7 @@ if HAS_SQLITE3 || HAS_MYSQL || HAS_POSTGRES
       
       @item = Item.create
       @item_two = ItemTwo.create
+      @item_three = ItemThree.create
     end
     
     after :each do
@@ -44,6 +56,10 @@ if HAS_SQLITE3 || HAS_MYSQL || HAS_POSTGRES
     it 'should set a default type' do
       Item.configuration_options[:one][:type].should eql(:string)
       Item.configuration_options[:two][:type].should eql(:boolean)
+    end
+
+    it 'should set all the options automatically' do
+      ItemThree.configuration_options[:one].should eql(ItemThree.configuration_options[:two])
     end
     
     it 'should provide a way to add dynamically a new set of options' do

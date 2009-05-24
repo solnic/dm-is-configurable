@@ -32,8 +32,8 @@ module DataMapper
         
         unless options[:with].nil?
           self.configuration_options = options[:with]
-          self.prepare_configuration_options
-          self.validate_configuration_options
+          prepare_configuration_options
+          validate_configuration_options
         end
       end
       
@@ -45,9 +45,9 @@ module DataMapper
             [Configuration, ConfigurationOption].each { |m| m.auto_migrate! }
           end
           
-          self.configuration_options.merge!(options) if options
-          self.prepare_configuration_options
-          self.configuration_options.each do |name, properties|
+          configuration_options.merge!(options) if options
+          prepare_configuration_options
+          configuration_options.each do |name, properties|
             conf_properties = { :name => name, 
                 :type => properties[:type], 
                 :default => properties[:default],
@@ -61,13 +61,17 @@ module DataMapper
         end
         
         def prepare_configuration_options
-          self.configuration_options.each do |name, properties|
-            if properties[:type].nil?
-              default_class = properties[:default].class.to_s
-              self.configuration_options[name][:type] = default_class == 'NilClass' ? 
+          configuration_options.each do |name, value|
+            options = value.is_a?(Hash) ? value : { :default => value }
+            
+            if options[:type].nil?
+              default_class = options[:default].class.to_s
+              options[:type] = default_class == 'NilClass' ?
                 :string : default_class =~ /FalseClass|TrueClass/ ?
                   :boolean : default_class.downcase.to_sym
             end
+
+            configuration_options[name] = options
           end
         end
         
