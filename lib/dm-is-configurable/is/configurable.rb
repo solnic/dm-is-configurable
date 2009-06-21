@@ -9,6 +9,8 @@ module DataMapper
           super("Class '#{who}' has invalid types for the following options: #{errors.map{|v,k| "#{v} => #{k}"}.join(', ')}")
         end
       end
+
+      class ConfigurationNotFound < StandardError; end
       
       ##
       # fired when your plugin gets included into Resource
@@ -48,11 +50,11 @@ module DataMapper
           configuration_options.merge!(options) if options
           prepare_configuration_options
           configuration_options.each do |name, properties|
-            conf_properties = { :name => name, 
+            conf_properties = { :name => name,
                 :type => properties[:type], 
                 :default => properties[:default],
                 :model_class => self }
-            if configuration = Configuration.first(:name => name, :model_class => self)
+            if configuration = Configuration.first(:name => "#{name}", :model_class => "#{self}")
               configuration.update(conf_properties)
             else
               Configuration.create(conf_properties)
@@ -100,10 +102,10 @@ module DataMapper
         end
         
         def options_set(name, value)
-          configuration, option = fetch_configuration_option(name)
-          do_update = DataMapper::Types::Option.dump(value.to_s) != configuration.default
+          conf, option = fetch_configuration_option(name)
+          do_update = DataMapper::Types::Option.dump(value.to_s) != conf.default
           if do_update && option.nil?
-            params = {:configuration_id => configuration.id, :value => value}
+            params = {:configuration_id => conf.id, :value => value}
             if new?
               option = self.options.new(params)
             else
@@ -120,9 +122,9 @@ module DataMapper
         end
         
         def options_get(name)
-          configuration, option = fetch_configuration_option(name)
-          option_value = option.nil? ? configuration.default : option.value
-          case configuration.type
+          conf, option = fetch_configuration_option(name)
+          option_value = option.nil? ? conf.default : option.value
+          case conf.type
           when 'boolean'
             option_value == '1'
           when 'fixnum'
@@ -137,13 +139,20 @@ module DataMapper
         private
         
         def fetch_configuration_option(name)
-          configuration = Configuration.first(:name => name, :model_class => self.class.to_s)
+          configuration = fetch_configuration(name)
           unless new?
             option = configuration.options.first(:configurable_id => id)
           else
             option = self.options.detect { |o| o if o.configuration_id == configuration.id }
           end
           [configuration, option]
+        end
+
+        def fetch_configuration(name)
+          unless conf = Configuration.first(:model_class => "#{self.class}", :name => "#{name}")
+            raise ConfigurationNotFound.new("Model #{self.class} has no configuration called '#{name}'")
+          end
+          conf
         end
         
       end # InstanceMethods
@@ -155,7 +164,8 @@ module DataMapper
         
         def all
           options = {}
-          @configurable.class.configuration_options.keys.each{ |name| options[name] = @configurable.options_get(name) }
+          @configurable.class.configuration_options.keys.each{
+            |name| options[name] = @configurable.options_get(name) }
           options
         end
         

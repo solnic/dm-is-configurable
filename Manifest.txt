@@ -15,3 +15,5 @@ spec/unit/configuration_option_spec.rb
 spec/unit/configuration_spec.rb
 spec/spec.opts
 spec/spec_helper.rb
+tasks/install.rb
+tasks/spec.rb
