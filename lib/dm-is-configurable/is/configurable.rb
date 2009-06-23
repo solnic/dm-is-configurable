@@ -41,24 +41,29 @@ module DataMapper
       
       module ClassMethods
         attr_accessor :configuration_options
+        attr_reader :configuration_cache
         
         def setup_configuration(options={})
           unless Configuration.storage_exists? || ConfigurationOption.storage_exists?
             [Configuration, ConfigurationOption].each { |m| m.auto_migrate! }
           end
+
+          @configuration_cache ||= {}
           
           configuration_options.merge!(options) if options
           prepare_configuration_options
           configuration_options.each do |name, properties|
             conf_properties = { :name => name,
                 :type => properties[:type], 
-                :default => properties[:default],
+                :default => DataMapper::Types::Option.dump(properties[:default]),
                 :model_class => self }
             if configuration = Configuration.first(:name => "#{name}", :model_class => "#{self}")
               configuration.update(conf_properties)
             else
-              Configuration.create(conf_properties)
+              configuration = Configuration.create(conf_properties)
             end
+
+            @configuration_cache[configuration.name.to_sym] = configuration
           end
         end
         
@@ -103,7 +108,7 @@ module DataMapper
         
         def options_set(name, value)
           conf, option = fetch_configuration_option(name)
-          do_update = DataMapper::Types::Option.dump(value.to_s) != conf.default
+          do_update = value != DataMapper::Types::Option.dump(conf.default)
           if do_update && option.nil?
             params = {:configuration_id => conf.id, :value => value}
             if new?
@@ -123,7 +128,7 @@ module DataMapper
         
         def options_get(name)
           conf, option = fetch_configuration_option(name)
-          option_value = option.nil? ? conf.default : option.value
+          option_value = option ? option.value : conf.default
           case conf.type
           when 'boolean'
             option_value == '1'
@@ -139,17 +144,19 @@ module DataMapper
         private
         
         def fetch_configuration_option(name)
-          configuration = fetch_configuration(name)
+          conf = fetch_configuration(name)
           unless new?
-            option = configuration.options.first(:configurable_id => id)
+            option = ConfigurationOption.get(conf.id, id)
           else
-            option = self.options.detect { |o| o if o.configuration_id == configuration.id }
+            option = self.options.detect { |o| o if o.configuration_id == conf.id }
           end
-          [configuration, option]
+          [conf, option]
         end
 
         def fetch_configuration(name)
-          unless conf = Configuration.first(:model_class => "#{self.class}", :name => "#{name}")
+          conf = self.class.configuration_cache[name.to_sym] || Configuration.first(
+            :model_class => "#{self.class}", :name => "#{name}")
+          unless conf
             raise ConfigurationNotFound.new("Model #{self.class} has no configuration called '#{name}'")
           end
           conf

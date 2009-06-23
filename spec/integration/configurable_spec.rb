@@ -4,7 +4,6 @@ require Pathname(__FILE__).dirname.expand_path.parent + 'spec_helper'
 if HAS_SQLITE3 || HAS_MYSQL || HAS_POSTGRES
   
   describe 'DataMapper::Is::Configurable' do
-    
     before :all do
       [Configuration, ConfigurationOption].each { |m| m.auto_migrate! }
       
@@ -73,7 +72,6 @@ if HAS_SQLITE3 || HAS_MYSQL || HAS_POSTGRES
     end
 
     describe 'Default values' do
-
       it 'should return default values' do
         @item.configuration[:one].should eql('something')
         @item.configuration[:two].should be(true)
@@ -87,11 +85,9 @@ if HAS_SQLITE3 || HAS_MYSQL || HAS_POSTGRES
         @item.configuration[:one].should eql('something')
         ConfigurationOption.all.size.should eql(count)
       end
-
     end
 
     describe 'Setting custom values' do
-
       it 'should create an option for the resource with FalseClass as the value' do
         @item.configuration[:two] = false
         @item.configuration[:two].should be(false)
@@ -127,11 +123,9 @@ if HAS_SQLITE3 || HAS_MYSQL || HAS_POSTGRES
         @item.configuration = new_options
         (@item.configuration.all == new_options).should be(true)
       end
-
     end
 
     describe 'Getting custom values' do
-
       it 'should return all options' do
         @item.configuration[:one]   = '1'
         @item.configuration[:two]   = '0'
@@ -147,11 +141,9 @@ if HAS_SQLITE3 || HAS_MYSQL || HAS_POSTGRES
         @item.configuration[:two] = true
         @item.configuration.two?.should be(true)
       end
-
     end
 
     describe 'Scoped configuration options' do
-
       before :all do
         @item.configuration[:one] = 'item'
         @item_two.configuration[:one] = 'item two'
@@ -161,7 +153,24 @@ if HAS_SQLITE3 || HAS_MYSQL || HAS_POSTGRES
         @item.configuration[:one].should eql('item')
         @item_two.configuration[:one].should eql('item two')
       end
+    end
 
+    describe 'Configuration Cache' do
+      before :all do
+        @cache = Item.configuration_cache
+      end
+
+      it 'should have configuration objects cached' do
+        @cache.should_not be_nil
+        Item.configuration_options.keys.each do |name|
+          @cache[name].should eql(Configuration.first(:model_class => 'Item', :name => name))
+        end
+      end
+
+      it 'should get configuration from cache' do
+        Configuration.should_not_receive(:first)
+        [:one, :two, :three].each { |name| @item.configuration[name] }
+      end
     end
   end
 end

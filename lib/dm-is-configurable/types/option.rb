@@ -7,12 +7,13 @@ module DataMapper
       
       def self.dump(value, property = nil)
         return nil if value.nil?
+        value = value.to_s
         if value == 'false'
           '0'
         elsif value == 'true'
           '1'
         else
-          value.to_s
+          value
         end
       end
     end
