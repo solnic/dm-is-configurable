@@ -3,7 +3,7 @@ class ConfigurationOption
   
   property :configuration_id,  Integer, :key => true
   property :configurable_id,   Integer, :key => true
-  property :value,             DataMapper::Types::Option, :nullable => false
+  property :value,             DataMapper::Types::Option, :required => true
   
   belongs_to :configuration
   

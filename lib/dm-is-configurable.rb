@@ -3,8 +3,8 @@ require 'rubygems'
 require 'pathname'
 
 # Add all external dependencies for the plugin here
-gem 'dm-core', '>=0.10'
-gem 'dm-validations', '>=0.10'
+gem 'dm-core', '>=0.10.2'
+gem 'dm-validations', '>=0.10.2'
 
 require 'dm-core'
 require 'dm-validations'
